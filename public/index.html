@@ -494,10 +494,10 @@
         const pdfDoc = await PDFLib.PDFDocument.load(pdfBytes);
 
         // Remove the last page of the PDF
-        const totalPages = pdfDoc.getPageCount();
-        if (totalPages > 0) {
-          pdfDoc.removePage(totalPages);
-        }
+        // const totalPages = pdfDoc.getPageCount();
+        // if (totalPages > 0) {
+        //   pdfDoc.removePage(totalPages);
+        // }
 
         const newPage = pdfDoc.addPage([595, 842]); // A4 size
         const font = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
