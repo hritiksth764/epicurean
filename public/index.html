@@ -315,7 +315,7 @@
       <!-- PDF Preview -->
       <iframe
         id="pdf-preview"
-        src="/public/Epicurean.pdf"
+        src="/Epicurean.pdf"
         type="application/pdf"
         style="
           width: 100%;
@@ -327,7 +327,7 @@
       </iframe>
       <p class="need-changes">
         If you cannot view the PDF,
-        <a href="/public/Epicurean.pdf" target="_blank"
+        <a href="/Epicurean.pdf" target="_blank"
           >click here to open or download it</a
         >
       </p>
@@ -488,7 +488,7 @@
 
         const signatureImage = signatureCanvas.toDataURL("image/png");
 
-        const pdfBytes = await fetch("/public/Epicurean.pdf").then((res) =>
+        const pdfBytes = await fetch("/Epicurean.pdf").then((res) =>
           res.arrayBuffer()
         );
         const pdfDoc = await PDFLib.PDFDocument.load(pdfBytes);
