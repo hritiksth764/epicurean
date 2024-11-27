@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EOI Form with Signed PDF</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+      body {
+        margin: 20px;
+        background: #0c0707;
+      }
+
+      html,
+      body {
+        overflow-x: hidden; /* Prevent horizontal scrolling */
+      }
+
+      @font-face {
+        font-family: "Avenir Next";
+        src: url("fonts/Avenir Next.ttc") format("truetype");
+        font-weight: 400;
+        font-style: normal;
+      }
+
+      @font-face {
+        font-family: "Agentur";
+        src: url("fonts/FontsFree-Net-Agentur-Regular.ttf") format("truetype");
+        font-weight: 400;
+        font-style: normal;
+      }
+
+      @font-face {
+        font-family: "Agentur Display";
+        src: url("fonts/FontsFree-Net-Agentur-Display.ttf") format("truetype");
+        font-weight: 400;
+        font-style: normal;
+      }
+
+      @font-face {
+        font-family: "Roboto Mono";
+        src: url("fonts/RobotoMono-VariableFont_wght.ttf") format("truetype");
+        font-weight: 400;
+        font-style: normal;
+      }
+
+      #form-container {
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: white;
+        padding: 20px;
+        border-radius: 5px;
+      }
+
+      #pdf-preview {
+        width: 100%;
+        height: 500px;
+        border: 1px solid #ccc;
+        margin-bottom: 20px;
+        overflow: scroll;
+      }
+
+      form {
+        display: flex;
+        flex-direction: column;
+        gap: 15px; /* Consistent spacing between fields */
+      }
+
+      form div {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      label {
+        font-weight: bold;
+        margin-bottom: 5px;
+        color: #111;
+        font-family: "Avenir Next";
+        font-size: 14px;
+        font-style: normal;
+        font-weight: 400;
+        line-height: 140%; /* 19.6px */
+      }
+
+      h1 {
+        color: #fff;
+        text-align: center;
+        font-family: Agentur !important;
+        font-size: 50px; /* Reduced size for mobile */
+        font-style: normal;
+        font-weight: 400;
+        line-height: 120%; /* Adjusted for smaller screens */
+        letter-spacing: 2px;
+        text-transform: uppercase;
+      }
+
+      p {
+        color: #baaf95;
+        text-align: center;
+        font-family: "Work Sans";
+        font-size: 16px; /* Smaller font size for readability on mobile */
+        font-style: normal;
+        font-weight: 400;
+        line-height: 140%; /* Adjusted line height */
+        letter-spacing: 2px;
+      }
+
+      input,
+      textarea {
+        max-width: 100%; /* Prevent input from exceeding form-container */
+        width: 100%; /* Full width for mobile */
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box; /* Includes padding and border in the width */
+        color: var(--Black-60, rgba(17, 17, 19, 0.6));
+        font-family: "Avenir";
+        font-size: 14px;
+        font-style: normal;
+        font-weight: 400;
+        line-height: 140%; /* 19.6px */
+      }
+
+      button {
+        width: 200px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        cursor: pointer;
+        padding: 10px 20px;
+        border-radius: 4px;
+        margin-top: 10px;
+        align-self: center;
+        border-radius: 2px;
+        background: #111;
+      }
+
+      button:hover {
+        background-color: #0056b3;
+      }
+
+      #signature-preview {
+        font-family: "Pacifico", cursive;
+        font-size: 24px;
+        color: #333;
+        margin-top: 10px;
+      }
+
+      a {
+        color: #c14535;
+        font-family: "Avenir Next";
+        font-size: 14px;
+        font-style: normal;
+        font-weight: 700;
+        line-height: 180%;
+        text-decoration-line: underline;
+        text-decoration-style: solid;
+        text-decoration-skip-ink: none;
+        text-decoration-thickness: auto;
+        text-underline-offset: auto;
+        text-underline-position: from-font;
+      }
+
+      .Disclaimer {
+        align-self: stretch;
+        color: #414141;
+        text-align: left;
+        font-family: "Avenir Next";
+        font-size: 10px;
+        font-style: italic;
+        font-weight: 200;
+        line-height: 140%; /* 14px */
+        opacity: 0.8;
+      }
+
+      #footer {
+        margin-bottom: 20px !important;
+        margin-top: auto;
+        text-align: center;
+        /* color: #fff !important; */
+        font-family: "Avenir Next";
+        font-size: 14px;
+        line-height: 1.6;
+        padding: 20px 10px;
+      }
+
+      #footer a {
+        color: #baaf95;
+        text-decoration: none;
+        font-weight: bold;
+      }
+
+      /* Mobile adjustments */
+      @media (max-width: 768px) {
+        body {
+          margin: 10px; /* Reduce margin for smaller screens */
+        }
+
+        #form-container {
+          padding: 15px; /* Adjust padding */
+          border-radius: 4px;
+        }
+
+        #pdf-preview {
+          height: 300px; /* Reduce height for mobile screens */
+        }
+
+        h1 {
+          margin-top: 94px;
+          margin-bottom: 0px;
+          font-size: 28px; /* Further reduce heading size for mobile */
+          line-height: 120%;
+        }
+
+        .heading-paragraph {
+          color: #baaf95;
+          text-align: center;
+          font-family: "Work Sans";
+          font-size: 14px;
+          font-style: normal;
+          font-weight: 400;
+          line-height: 140%;
+          letter-spacing: 3.2px;
+          margin-bottom: 48px; /* Space below the first paragraph */
+        }
+
+        .subtext-paragraph {
+          color: #baaf95;
+          text-align: center;
+          font-family: "Work Sans";
+          font-size: 14px;
+          font-style: normal;
+          font-weight: 400;
+          line-height: 140%;
+          letter-spacing: 3.2px;
+        }
+
+        .need-changes {
+          color: black;
+          text-align: center;
+          font-family: "Avenir Next";
+          font-size: 12px;
+          font-style: normal;
+          font-weight: 400;
+          line-height: 160%; /* 19.2px */
+        }
+
+        a {
+          color: #c14535;
+          font-family: "Avenir Next";
+          font-size: 14px;
+          font-style: normal;
+          font-weight: 700;
+          line-height: 180%;
+          text-decoration-line: underline;
+          text-decoration-style: solid;
+          text-decoration-skip-ink: none;
+          text-decoration-thickness: auto;
+          text-underline-offset: auto;
+          text-underline-position: from-font;
+        }
+
+        .Disclaimer {
+          align-self: stretch;
+          color: #414141;
+          text-align: left;
+          font-family: "Avenir Next";
+          font-size: 8px;
+          font-style: italic;
+          font-weight: 400;
+          line-height: 140%; /* 14px */
+          opacity: 0.8;
+        }
+
+        button {
+          width: 100%; /* Full width buttons on mobile */
+          padding: 12px; /* Slightly larger buttons */
+          align-self: center;
+          margin-bottom: 20px;
+        }
+        #footer {
+          margin-bottom: 40px;
+          margin-top: 5px;
+          text-align: center;
+          /* color: #fff !important; */
+          font-family: "Avenir Next";
+          font-size: 10px;
+          line-height: 1.6;
+          padding: 20px 10px;
+        }
+
+        #footer a {
+          color: #baaf95;
+          text-decoration: none;
+          font-weight: bold;
+        }
+      }
+    </style>
+    <!-- Google Font for Signature Style -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <h1>JOIN US AT REGALIUM</h1>
+    <p class="heading-paragraph">A Realisation of the Future</p>
+    <p class="subtext-paragraph">
+      Please go through the Expression of Interest and fill out the below form.
+    </p>
+    <div id="form-container">
+      <!-- <h1>JOIN US AS REGALIUM</h1> -->
+      <!-- PDF Preview -->
+      <iframe
+        id="pdf-preview"
+        src="/public/Epicurean.pdf"
+        type="application/pdf"
+        style="
+          width: 100%;
+          height: 500px;
+          border: 1px solid #ccc;
+          overflow: scroll;
+        "
+      >
+      </iframe>
+      <p class="need-changes">
+        If you cannot view the PDF,
+        <a href="/public/Epicurean.pdf" target="_blank"
+          >click here to open or download it</a
+        >
+      </p>
+      <!-- EOI Form -->
+      <form id="eoi-form" onsubmit="handleSubmit(event)">
+        <label for="brandName">Company Name:</label>
+        <input id="brandName" name="brandName" required />
+
+        <label for="legalEntity">Legal Entity:</label>
+        <input id="legalEntity" name="legalEntity" required />
+
+        <label for="contactPerson">Contact Person:</label>
+        <input id="contactPerson" name="contactPerson" required />
+
+        <label for="contactDetails">Contact Details(Phone):</label>
+        <input id="contactDetails" name="contactDetails" required />
+
+        <label for="category">Category of Business:</label>
+        <input id="category" name="category" required />
+
+        <label for="carpetArea">Approximate Area Requirement in (Sq.Ft):</label>
+        <input id="carpetArea" name="carpetArea" required />
+
+        <label for="specificRequirements"
+          >Any Specific Requirements or Preferences:</label
+        >
+        <textarea
+          id="specificRequirements"
+          name="specificRequirements"
+        ></textarea>
+
+        <label for="signatureName">Name (For Signature):</label>
+        <input
+          id="signatureName"
+          name="signatureName"
+          required
+          oninput="generateSignature()"
+        />
+        <div id="signature-preview">Your signature will appear here...</div>
+
+        <label for="designation">Designation:</label>
+        <input id="designation" name="designation" required />
+
+        <p class="Disclaimer">
+          *Please note that this EOI is intended solely for planning purposes
+          and does not constitute a binding agreement. Upon receiving your EOI,
+          we will provide further details and engage in discussions to finalize
+          the terms and conditions of the lease agreement.
+        </p>
+
+        <button type="submit">Submit & Download PDF</button>
+      </form>
+    </div>
+
+    <footer id="footer">
+      <p>
+        Bungalow 375, 13th Main Road, 3rd Block Koramangala, Bengaluru,
+        Karnataka 560034<br />
+        <a href="https://www.regalium.com" target="_blank">www.regalium.com</a>
+        |
+        <a href="mailto:info@regalium.com">info@regalium.com</a>
+      </p>
+    </footer>
+
+    <script>
+      function generateSignature() {
+        const name = document.getElementById("signatureName").value;
+        const signaturePreview = document.getElementById("signature-preview");
+        signaturePreview.textContent =
+          name.trim() !== "" ? name : "Your signature will appear here...";
+      }
+
+      async function handleSubmit(event) {
+        event.preventDefault();
+
+        const formData = {
+          brandName: document.getElementById("brandName").value,
+          legalEntity: document.getElementById("legalEntity").value,
+          contactPerson: document.getElementById("contactPerson").value,
+          contactDetails: document.getElementById("contactDetails").value,
+          category: document.getElementById("category").value,
+          carpetArea: document.getElementById("carpetArea").value,
+          specificRequirements: document.getElementById("specificRequirements")
+            .value,
+          designation: document.getElementById("designation").value,
+        };
+
+        try {
+          // Save data to Google Sheets
+          await saveToGoogleSheets(formData);
+
+          alert(
+            "Your data has been successfully saved! Generating your signed EOI..."
+          );
+
+          // Generate the signed PDF
+          await generateSignedPDF(formData);
+
+          // Clear the form fields after successful generation
+          document.getElementById("eoi-form").reset();
+          generateSignature(); // Reset the signature preview
+        } catch (error) {
+          console.error("Error during submission:", error);
+          alert("An error occurred. Please try again.");
+        }
+      }
+
+      async function saveToGoogleSheets(data) {
+        const sheetDBUrl = "https://sheetdb.io/api/v1/bj6225ppxgbr9"; // Replace with your SheetDB API URL
+
+        const formattedData = {
+          data: {
+            "Brand Name": data.brandName,
+            "Legal Entity": data.legalEntity,
+            "Contact Person": data.contactPerson,
+            "Contact Details": data.contactDetails,
+            Category: data.category,
+            "Carpet Area": data.carpetArea,
+            Requirements: data.specificRequirements || "N/A",
+            Designation: data.designation,
+            Timestamp: new Date().toLocaleString(),
+          },
+        };
+
+        try {
+          const response = await axios.post(sheetDBUrl, formattedData);
+          console.log("Data saved successfully:", response.data);
+        } catch (error) {
+          console.error("Error saving data to Google Sheets:", error);
+          throw new Error("Failed to save data to Google Sheets.");
+        }
+      }
+
+      async function generateSignedPDF(formData) {
+        const signaturePreview = document.getElementById("signature-preview");
+        const scaleFactor = 8;
+        const padding = 20;
+
+        const signatureCanvas = document.createElement("canvas");
+        signatureCanvas.width = signaturePreview.offsetWidth * scaleFactor;
+        signatureCanvas.height =
+          (signaturePreview.offsetHeight + padding * 2) * scaleFactor;
+
+        const ctx = signatureCanvas.getContext("2d");
+        ctx.scale(scaleFactor, scaleFactor);
+        ctx.fillStyle = "#fff";
+        ctx.fillRect(0, 0, signatureCanvas.width, signatureCanvas.height);
+
+        const computedStyle = window.getComputedStyle(signaturePreview);
+        const fontSize = parseFloat(computedStyle.fontSize) || 16;
+        ctx.font = `${fontSize}px ${computedStyle.fontFamily || "Pacifico"}`;
+        ctx.fillStyle = "#000";
+        ctx.textBaseline = "middle";
+
+        const y = signatureCanvas.height / (2 * scaleFactor);
+        const x = 10;
+        ctx.fillText(signaturePreview.textContent, x, y);
+
+        const signatureImage = signatureCanvas.toDataURL("image/png");
+
+        const pdfBytes = await fetch("/public/Epicurean.pdf").then((res) =>
+          res.arrayBuffer()
+        );
+        const pdfDoc = await PDFLib.PDFDocument.load(pdfBytes);
+
+        // Remove the last page of the PDF
+        const totalPages = pdfDoc.getPageCount();
+        if (totalPages > 0) {
+          pdfDoc.removePage(totalPages - 1);
+        }
+
+        const newPage = pdfDoc.addPage([595, 842]); // A4 size
+        const font = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
+
+        const signatureImageBytes = await fetch(signatureImage).then((res) =>
+          res.arrayBuffer()
+        );
+        const signatureImageEmbedded = await pdfDoc.embedPng(
+          signatureImageBytes
+        );
+
+        const tableData = [
+          ["Company Name", formData.brandName],
+          ["Legal Entity", formData.legalEntity],
+          ["Contact Person", formData.contactPerson],
+          ["Contact Details", formData.contactDetails],
+          ["Category of Business", formData.category],
+          [
+            "Approx. carpet area requirement  (Sq.Ft)",
+            `${formData.carpetArea} Sq.Ft`,
+          ],
+          [
+            "Any Specific Requirements or Preferences",
+            formData.specificRequirements || "N/A",
+          ],
+        ];
+
+        let currentY = 750;
+
+        // Center the "YOUR DETAILS" heading
+        const headingText = "YOUR DETAILS";
+        const headingFontSize = 16;
+        const headingWidth = font.widthOfTextAtSize(
+          headingText,
+          headingFontSize
+        );
+        const headingX = (newPage.getWidth() - headingWidth) / 2;
+
+        newPage.drawText(headingText, {
+          x: headingX,
+          y: currentY + 20,
+          size: headingFontSize,
+          font,
+          color: PDFLib.rgb(0, 0, 0),
+        });
+
+        currentY -= 40;
+
+        // const tableStartX = 50;
+        const tableStartY = currentY;
+        const rowHeight = 25;
+        const lineThickness = 0.5;
+
+        currentY = tableStartY;
+
+        // Set equal column widths and adjust table layout
+        const tableWidth = 500; // Total width of the table
+        const colWidth = tableWidth / 2; // Equal width for both columns
+
+        // Adjust the starting X position for the table to center it on the page
+        const pageWidth = newPage.getWidth();
+        const tableStartX = (pageWidth - tableWidth) / 2; // Center the table horizontally
+
+        // Draw the table rows
+        tableData.forEach(([label, value]) => {
+          // Left column cell
+          newPage.drawRectangle({
+            x: tableStartX, // Starting position for the left column
+            y: currentY - rowHeight,
+            width: colWidth,
+            height: rowHeight,
+            borderWidth: lineThickness,
+            borderColor: PDFLib.rgb(0, 0, 0),
+            color: PDFLib.rgb(1, 1, 1),
+          });
+
+          // Right column cell
+          newPage.drawRectangle({
+            x: tableStartX + colWidth, // Start position for the right column
+            y: currentY - rowHeight,
+            width: colWidth,
+            height: rowHeight,
+            borderWidth: lineThickness,
+            borderColor: PDFLib.rgb(0, 0, 0),
+            color: PDFLib.rgb(1, 1, 1),
+          });
+
+          // Draw text for the left column
+          newPage.drawText(label, {
+            x: tableStartX + 5, // Padding inside the left column
+            y: currentY - rowHeight + 8,
+            size: 12,
+            font,
+            color: PDFLib.rgb(0, 0, 0),
+            maxWidth: colWidth - 10, // Ensure text doesn't overflow
+          });
+
+          // Draw text for the right column
+          newPage.drawText(value, {
+            x: tableStartX + colWidth + 5, // Padding inside the right column
+            y: currentY - rowHeight + 8,
+            size: 12,
+            font,
+            color: PDFLib.rgb(0, 0, 0),
+            maxWidth: colWidth - 10, // Ensure text doesn't overflow
+          });
+
+          currentY -= rowHeight;
+        });
+        currentY -= 40;
+
+        const disclaimerText =
+          "Please note that this EOI is intended solely for planning purposes and does not constitute a binding agreement. " +
+          "Upon receiving your EOI, we will provide further details and engage in discussions to finalize the terms and " +
+          "conditions of the lease agreement.";
+
+        newPage.drawText(disclaimerText, {
+          x: tableStartX,
+          y: currentY,
+          size: 10,
+          font,
+          color: PDFLib.rgb(0, 0, 0),
+          lineHeight: 12,
+          maxWidth: 495,
+        });
+
+        currentY -= 60;
+
+        newPage.drawText("Signature:", {
+          x: tableStartX,
+          y: currentY,
+          size: 12,
+          font,
+        });
+
+        const imageWidth = 250;
+        const aspectRatio = signatureCanvas.width / signatureCanvas.height;
+        const imageHeight = imageWidth / aspectRatio;
+
+        newPage.drawImage(signatureImageEmbedded, {
+          x: tableStartX,
+          y: currentY - imageHeight - 10,
+          width: imageWidth,
+          height: imageHeight,
+        });
+
+        currentY -= imageHeight + 50;
+
+        newPage.drawText("Digitally Verified", {
+          x: tableStartX,
+          y: currentY,
+          size: 12,
+          font,
+        });
+
+        newPage.drawText(`Date: ${new Date().toLocaleDateString()}`, {
+          x: tableStartX,
+          y: currentY - 20,
+          size: 12,
+          font,
+        });
+
+        const updatedPdfBytes = await pdfDoc.save();
+        const blob = new Blob([updatedPdfBytes], { type: "application/pdf" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "Signed_EOI.pdf";
+        link.click();
+      }
+    </script>
+  </body>
+</html>
