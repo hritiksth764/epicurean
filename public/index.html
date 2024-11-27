@@ -496,7 +496,7 @@
         // Remove the last page of the PDF
         const totalPages = pdfDoc.getPageCount();
         if (totalPages > 0) {
-          pdfDoc.removePage(totalPages - 1);
+          pdfDoc.removePage(totalPages);
         }
 
         const newPage = pdfDoc.addPage([595, 842]); // A4 size
