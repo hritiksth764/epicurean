@@ -315,7 +315,7 @@
       <!-- PDF Preview -->
       <iframe
         id="pdf-preview"
-        src="Epicurean_Regalium_Letterhead_Template.pdf"
+        src="/eoi.pdf"
         type="application/pdf"
         style="
           width: 100%;
@@ -327,9 +327,7 @@
       </iframe>
       <p class="need-changes">
         If you cannot view the PDF,
-        <a href="Epicurean_Regalium_Letterhead_Template.pdf" target="_blank"
-          >click here to open or download it</a
-        >
+        <a href="/eoi.pdf" target="_blank">click here to open or download it</a>
       </p>
       <!-- EOI Form -->
       <form id="eoi-form" onsubmit="handleSubmit(event)">
@@ -488,7 +486,7 @@
 
         const signatureImage = signatureCanvas.toDataURL("image/png");
 
-        const pdfBytes = await fetch("/Epicurean.pdf").then((res) =>
+        const pdfBytes = await fetch("/eoi.pdf").then((res) =>
           res.arrayBuffer()
         );
         const pdfDoc = await PDFLib.PDFDocument.load(pdfBytes);
