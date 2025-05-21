@@ -355,6 +355,9 @@
         <label for="bohArea">Back of House Area Requirement (in Sq.Ft):</label>
         <input id="bohArea" name="bohArea" required />
 
+        <label for="alcohol">Alcohol (Yes/No):</label>
+        <input id="alcohol" name="alcohol" required />
+
         <label for="specificRequirements"
           >Any Specific Requirements or Preferences:</label
         >
@@ -416,6 +419,7 @@
           category: document.getElementById("category").value,
           fohArea: document.getElementById("fohArea").value,
           bohArea: document.getElementById("bohArea").value,
+          alcohol: document.getElementById("alcohol").value,
           specificRequirements: document.getElementById("specificRequirements")
             .value,
           designation: document.getElementById("designation").value,
@@ -454,6 +458,7 @@
             Category: data.category,
             "Front of House Area": data.fohArea,
             "Back of House Area": data.bohArea,
+            Alcohol: data.alcohol,
             Requirements: data.specificRequirements || "N/A",
             Designation: data.designation,
             Timestamp: new Date().toLocaleString(),
@@ -532,6 +537,7 @@
             "Back of House Area Requirement (Sq.Ft)",
             `${formData.bohArea} Sq.Ft`,
           ],
+          ["Alcohol (Yes/No)", formData.alcohol],
           [
             "Any Specific Requirements or Preferences",
             formData.specificRequirements || "N/A",
