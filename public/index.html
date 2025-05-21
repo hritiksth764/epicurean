@@ -346,8 +346,14 @@
         <label for="category">Category:</label>
         <input id="category" name="category" required />
 
-        <label for="carpetArea">Approximate Area Requirement in (Sq.Ft):</label>
-        <input id="carpetArea" name="carpetArea" required />
+        <!-- CHANGES ONLY: This replaces the old "carpetArea" section -->
+
+        <!-- Inside <form> -->
+        <label for="fohArea">Front of House Area Requirement (in Sq.Ft):</label>
+        <input id="fohArea" name="fohArea" required />
+
+        <label for="bohArea">Back of House Area Requirement (in Sq.Ft):</label>
+        <input id="bohArea" name="bohArea" required />
 
         <label for="specificRequirements"
           >Any Specific Requirements or Preferences:</label
@@ -401,13 +407,15 @@
       async function handleSubmit(event) {
         event.preventDefault();
 
+        // Inside handleSubmit
         const formData = {
           brandName: document.getElementById("brandName").value,
           legalEntity: document.getElementById("legalEntity").value,
           contactPerson: document.getElementById("contactPerson").value,
           contactDetails: document.getElementById("contactDetails").value,
           category: document.getElementById("category").value,
-          carpetArea: document.getElementById("carpetArea").value,
+          fohArea: document.getElementById("fohArea").value,
+          bohArea: document.getElementById("bohArea").value,
           specificRequirements: document.getElementById("specificRequirements")
             .value,
           designation: document.getElementById("designation").value,
@@ -436,6 +444,7 @@
       async function saveToGoogleSheets(data) {
         const sheetDBUrl = "https://sheetdb.io/api/v1/bj6225ppxgbr9"; // Replace with your SheetDB API URL
 
+        // Inside saveToGoogleSheets
         const formattedData = {
           data: {
             "Brand Name": data.brandName,
@@ -443,7 +452,8 @@
             "Contact Person": data.contactPerson,
             "Contact Details": data.contactDetails,
             Category: data.category,
-            "Carpet Area": data.carpetArea,
+            "Front of House Area": data.fohArea,
+            "Back of House Area": data.bohArea,
             Requirements: data.specificRequirements || "N/A",
             Designation: data.designation,
             Timestamp: new Date().toLocaleString(),
@@ -507,6 +517,7 @@
           signatureImageBytes
         );
 
+        // Inside tableData for PDF
         const tableData = [
           ["Company Name", formData.brandName],
           ["Legal Entity", formData.legalEntity],
@@ -514,8 +525,12 @@
           ["Contact Details", formData.contactDetails],
           ["Category of Business", formData.category],
           [
-            "Approx. carpet area requirement  (Sq.Ft)",
-            `${formData.carpetArea} Sq.Ft`,
+            "Front of House Area Requirement (Sq.Ft)",
+            `${formData.fohArea} Sq.Ft`,
+          ],
+          [
+            "Back of House Area Requirement (Sq.Ft)",
+            `${formData.bohArea} Sq.Ft`,
           ],
           [
             "Any Specific Requirements or Preferences",
